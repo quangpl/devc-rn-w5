@@ -4,8 +4,10 @@ import {
   Text,
   View,
   FlatList,
-  ActivityIndicator
+  ActivityIndicator,
+  TextInput
 } from "react-native";
+import Search from "./util/search";
 import TheLoading from "./components/TheLoading";
 import Header from "./components/Header";
 import Body from "./components/Body";
@@ -22,9 +24,34 @@ export default class App extends Component {
       isLoading: false,
       pageNumber: 0,
       hasError: false,
-      hasMoreArticles: true
+      hasMoreArticles: true,
+      tempData: []
     };
   }
+ filterForUniqueArticles = arr => {
+  const cleaned = [];
+  arr.forEach(itm => {
+    let unique = true;
+    cleaned.forEach(itm2 => {
+      const isEqual = JSON.stringify(itm) === JSON.stringify(itm2);
+      if (isEqual) unique = false;
+    });
+    if (unique) cleaned.push(itm);
+  });
+  return cleaned;
+};
+  onSearch = text => {
+    if (text) {
+      const newData = Search(text, this.state.tempData);
+      this.setState({
+        articles: [...newData]
+      });
+    } else {
+      this.setState({
+        articles: [...this.state.tempData]
+      });
+    }
+  };
   getArticles = async () => {
     let pageNumber = this.state.pageNumber;
     pageNumber++;
@@ -46,9 +73,16 @@ export default class App extends Component {
         return false;
       }
       this.setState({
-        articles: [...this.state.articles, ...data],
+        articles: this.filterForUniqueArticles([
+          ...this.state.articles,
+          ...data
+        ]),
         pageNumber,
-        isLoading: false
+        isLoading: false,
+        tempData: this.filterForUniqueArticles([
+          ...this.state.articles,
+          ...data
+        ])
       });
     } catch (e) {
       console.log(e);
@@ -56,11 +90,6 @@ export default class App extends Component {
         hasError: true
       });
     }
-    console.log(
-      `https://newsapi.org/v2/top-headlines?country=us&apiKey=${
-        Constant.apiKey
-      }&page=${pageNumber}`
-    );
   };
   async componentDidMount() {
     await this.getArticles(1);
@@ -79,6 +108,10 @@ export default class App extends Component {
         ) : (
           <View style={{ flex: 1 }}>
             <Header count={this.state.articles.length} />
+            {/* <TextInput
+              style={styles.input}
+              onChangeText={text => this.onSearch(text)}
+            /> */}
             <View style={styles.body}>
               <FlatList
                 data={this.state.articles}
@@ -95,7 +128,7 @@ export default class App extends Component {
                         loading={this.state.isLoading}
                       />
                     ) : (
-                      <NoArticles/>
+                      <NoArticles />
                     )}
                   </View>
                 }
@@ -119,5 +152,15 @@ const styles = StyleSheet.create({
   loading: {
     justifyContent: "center",
     flex: 1
-  }
+  },
+  // input: {
+  //   flex: 0.1,
+  //   borderColor: "gray",
+  //   borderWidth: 1,
+  //   borderRadius: 2,
+  //   width: "96%",
+  //   height: 20,
+  //   marginHorizontal: 7,
+  //   borderRadius: 10
+  // }
 });
