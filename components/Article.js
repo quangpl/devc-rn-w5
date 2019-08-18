@@ -1,18 +1,23 @@
 import React, { Component } from "react";
-import { StyleSheet, Text, View, Image, Button } from "react-native";
-
+import { StyleSheet, Text, View, Image, Button, Linking } from "react-native";
+import moment from "moment";
 export default class Article extends Component {
-  componentDidMount(){
-    console.log(this.props.data);
-  }
+  goToLink = url => {
+    Linking.canOpenURL(url).then(supported => {
+      if (supported) {
+        Linking.openURL(url);
+      } else {
+        alert(`Don't know how to open URL: ${url}`);
+      }
+    });
+  };
   render() {
-    goToLink = url => {
-      alert(url);
-    };
     return (
       <View style={styles.container}>
         <Text style={styles.title}>{this.props.data.title}</Text>
-        <Text style={styles.time}> {this.props.data.publishedAt}</Text>
+        <Text style={styles.time}>
+          {moment(this.props.data.publishedAt).format("LLL")}
+        </Text>
 
         <Image
           source={{
@@ -27,7 +32,7 @@ export default class Article extends Component {
         <Text style={styles.info}>{this.props.data.content}</Text>
 
         <Button
-          onPress={() => this.goToLink(this.props.url)}
+          onPress={() => this.goToLink(this.props.data.url)}
           title="Read more"
         />
       </View>
@@ -78,7 +83,7 @@ const styles = StyleSheet.create({
     flex: 0.5
   },
   time: {
-    marginVertical:5,
+    marginVertical: 5,
     fontSize: 14,
     textAlign: "center",
     color: "#BBBBBB"

@@ -1,19 +1,13 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
+import { Feather } from "@expo/vector-icons";
 
-export default class TheLoading extends Component {
+export default class Error extends Component {
   render() {
     return (
       <View style={styles.container}>
-        {this.props.loading ? (
-          <Image
-            source={require("../assets/loading.gif")}
-            style={{
-              width: 150,
-              height: 150
-            }}
-          />
-        ) : null}
+        <Feather name="alert-circle" size={24} color="black" />
+        <Text>Some thing went wrong, Try again ! </Text>
       </View>
     );
   }
@@ -21,8 +15,14 @@ export default class TheLoading extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: "row",
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center"
+  },
+  text: {
+    fontWeight: "bold",
+    fontSize: 20,
+    color: "blue"
   }
 });
