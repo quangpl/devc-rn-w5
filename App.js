@@ -12,6 +12,8 @@ import Body from "./components/Body";
 import Constant from "./util/constant";
 import Article from "./components/Article";
 import HeaderTitle from "./components/HeaderTitle";
+import Error from "./components/Error";
+import NoArticles from "./components/NoArticles";
 export default class App extends Component {
   constructor(props) {
     super(props);
@@ -19,7 +21,8 @@ export default class App extends Component {
       articles: [],
       isLoading: false,
       pageNumber: 0,
-      hasError: false
+      hasError: false,
+      hasMoreArticles: true
     };
   }
   getArticles = async () => {
@@ -35,6 +38,13 @@ export default class App extends Component {
         }&page=${pageNumber}`
       );
       const data = (await response.json()).articles;
+      if (data.length === 0) {
+        this.setState({
+          hasMoreArticles: false,
+          isLoading: false
+        });
+        return false;
+      }
       this.setState({
         articles: [...this.state.articles, ...data],
         pageNumber,
@@ -58,7 +68,9 @@ export default class App extends Component {
   render() {
     return (
       <View style={styles.container}>
-        {this.state.isLoading && this.state.pageNumber === 0 ? (
+        {this.state.hasError ? (
+          <Error />
+        ) : this.state.isLoading && this.state.pageNumber === 0 ? (
           <ActivityIndicator
             size="large"
             style={styles.loading}
@@ -73,13 +85,19 @@ export default class App extends Component {
                 renderItem={({ item }) => <Article data={item} />}
                 keyExtractor={item => item.title}
                 onEndReached={this.getArticles}
-                onEndReachedThreshold={0.4}
+                onEndReachedThreshold={1}
                 ListFooterComponent={
-                  <ActivityIndicator
-                    size="large"
-                    style={styles.loading}
-                    loading={this.state.isLoading}
-                  />
+                  <View>
+                    {this.state.hasMoreArticles ? (
+                      <ActivityIndicator
+                        size="large"
+                        style={styles.loading}
+                        loading={this.state.isLoading}
+                      />
+                    ) : (
+                      <NoArticles/>
+                    )}
+                  </View>
                 }
               />
             </View>
